@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace PolyculeDb.QueryEngine
 {
+    internal enum LexerPosition
+    {
+        Beginning,
+        Current,
+        End
+    }
+
     internal class Lexer
     {
         private readonly string _query;
@@ -24,16 +31,56 @@ namespace PolyculeDb.QueryEngine
 
         public Token? Peek()
         {
+            if (HasNext)
+                return _tokens[_index + 1];
             return null;
         }
 
         public Token? Next()
         {
             _index++;
+            if (HasNext)
+                return _tokens[_index];
             return null;
         }
 
-        public bool HasNext => false;
+        public void Seek(int index, LexerPosition pos)
+        {
+            switch (pos)
+            {
+                case LexerPosition.Beginning:
+                    _index = index;
+                    break;
+                case LexerPosition.Current:
+                    _index += index;
+                    break;
+                case LexerPosition.End:
+                    _index = (_tokens.Count - 1) + index;
+                    break;
+            }
+        }
+
+        public void Cache()
+        {
+            var refIndex = _index;
+            while (Next() is not null) { }
+            Seek(refIndex, LexerPosition.Beginning);
+        }
+
+        public bool HasNext
+        {
+            get
+            {
+                if (_tokens.Count - 1> _index + 1)
+                {
+                    var token = GetNextToken();
+                    if (token == null) return false;
+                    _tokens.Add(token);
+                }
+                if (_tokens[_index + 1] == null) return false; // this line might not be needed
+                return true;
+            }
+        }
 
         private Token? GetNextToken()
         {
@@ -84,33 +131,6 @@ namespace PolyculeDb.QueryEngine
                     throw new InvalidDataException($"Unknown character '{c}'");
             }
             return null;
-        }
-
-        public Lexer Execute()
-        {
-            while (_reader.Peek() != -1)
-            {
-                var c = (char)_reader.Read();
-                if (Char.IsWhiteSpace(c))
-                    continue;
-                else if (c == '#')
-                    _ = _reader.ReadLine();
-                else if (IsPuncuationChar(c))
-                    _tokens.Add(new Token { Type = TokenType.Punctuation, Value = c.ToString() });
-                else if (Char.IsDigit(c))
-                    _tokens.Add(ReadNumber(c));
-                else if (c == '*')
-                    _tokens.Add(new Token { Type = TokenType.Number, Value = UInt32.MaxValue });
-                else if (c == '"')
-                    _tokens.Add(ReadString());
-                else if (IsOperatorChar(c))
-                    _tokens.Add(ReadOperator(c));
-                else if (IsWordChar(c))
-                    _tokens.Add(ReadWord(c));
-                else
-                    throw new InvalidDataException($"Unknown character '{c}'");
-            }
-            return this;
         }
 
         private static bool IsPuncuationChar(char c) => "()[]".Contains(c);

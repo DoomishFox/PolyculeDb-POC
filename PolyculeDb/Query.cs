@@ -13,12 +13,12 @@ namespace PolyculeDb
 
         public Query(string query)
         {
-            _lexer= new Lexer(query);
+            _lexer = new Lexer(query);
         }
 
         public Query Compile()
         {
-            _ = _lexer.Execute();
+            _lexer.Cache();
             return this;
         }
     }

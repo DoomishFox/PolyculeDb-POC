@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoffeeCup", "CoffeeCup\CoffeeCup.csproj", "{04ADF564-0558-45C3-8199-45B3185087E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolyculeDb", "PolyculeDb\PolyculeDb.csproj", "{FD6F5B0D-8E43-4BFF-9A0B-8576D7A2045F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{04ADF564-0558-45C3-8199-45B3185087E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04ADF564-0558-45C3-8199-45B3185087E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04ADF564-0558-45C3-8199-45B3185087E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04ADF564-0558-45C3-8199-45B3185087E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD6F5B0D-8E43-4BFF-9A0B-8576D7A2045F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD6F5B0D-8E43-4BFF-9A0B-8576D7A2045F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD6F5B0D-8E43-4BFF-9A0B-8576D7A2045F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD6F5B0D-8E43-4BFF-9A0B-8576D7A2045F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D7DC5FB8-7464-4802-8419-77A4AC55F419}
+	EndGlobalSection
+EndGlobal

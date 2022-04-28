@@ -31,20 +31,27 @@ namespace PolyculeDb.QueryEngine
 
         public Token? Peek()
         {
-            if (HasNext)
+            if (HasNext())
                 return _tokens[_index + 1];
+            return null;
+        }
+
+        public Token? Peek(int count)
+        {
+            if (HasNext(count))
+                return _tokens[_index + count];
             return null;
         }
 
         public Token? Next()
         {
             _index++;
-            if (HasNext)
+            if (HasNext())
                 return _tokens[_index];
             return null;
         }
 
-        public void Seek(int index, LexerPosition pos)
+        public Lexer Seek(int index, LexerPosition pos)
         {
             switch (pos)
             {
@@ -58,28 +65,47 @@ namespace PolyculeDb.QueryEngine
                     _index = (_tokens.Count - 1) + index;
                     break;
             }
+            return this;
         }
 
-        public void Cache()
+        public Lexer Skip(int count)
+        {
+            Seek(count, LexerPosition.Current);
+            return this;
+        }
+
+        public Lexer Cache()
         {
             var refIndex = _index;
             while (Next() is not null) { }
             Seek(refIndex, LexerPosition.Beginning);
+            return this;
         }
 
-        public bool HasNext
+        public bool HasNext(int count)
         {
-            get
+            int tempIndex = _index;
+            while (_tokens.Count - 1 < tempIndex + count)
             {
-                if (_tokens.Count - 1> _index + 1)
-                {
-                    var token = GetNextToken();
-                    if (token == null) return false;
-                    _tokens.Add(token);
-                }
-                if (_tokens[_index + 1] == null) return false; // this line might not be needed
-                return true;
+                var token = GetNextToken();
+                if (token == null) return false;
+                _tokens.Add(token);
+                tempIndex++;
             }
+            if (_tokens[_index + count] == null) return false; // this line might not be needed
+            return true;
+        }
+
+        public bool HasNext()
+        {
+            if (_tokens.Count - 1 < _index + 1)
+            {
+                var token = GetNextToken();
+                if (token == null) return false;
+                _tokens.Add(token);
+            }
+            if (_tokens[_index + 1] == null) return false; // this line might not be needed
+            return true;
         }
 
         private Token? GetNextToken()
@@ -115,9 +141,9 @@ namespace PolyculeDb.QueryEngine
                     _tokens.Add(token);
                     return token;
                 }
-                else if (IsOperatorChar(c))
+                else if (IsComparerChar(c))
                 {
-                    var token = ReadOperator(c);
+                    var token = ReadComparer(c);
                     _tokens.Add(token);
                     return token;
                 }
@@ -135,7 +161,7 @@ namespace PolyculeDb.QueryEngine
 
         private static bool IsPuncuationChar(char c) => "()[]".Contains(c);
 
-        private static bool IsOperatorChar(char c) => "=<>!".Contains(c);
+        private static bool IsComparerChar(char c) => "=<>!".Contains(c);
 
         private static bool IsWordChar(char c) => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 
@@ -166,15 +192,15 @@ namespace PolyculeDb.QueryEngine
             return new Token { Type = TokenType.String, Value = sb.ToString() };
         }
 
-        private Token ReadOperator(char start)
+        private Token ReadComparer(char start)
         {
             var sb = new StringBuilder();
             sb.Append(start);
-            while (_reader.Peek() > 0 && IsOperatorChar((char)_reader.Peek()))
+            while (_reader.Peek() > 0 && IsComparerChar((char)_reader.Peek()))
                 sb.Append((char)_reader.Read());
-            Operator? op = sb.ToString().AsOperator();
+            Comparer? op = sb.ToString().AsComparer();
             if (op != null)
-                return new Token { Type = TokenType.Operation, Value = op.GetValueOrDefault() };
+                return new Token { Type = TokenType.Comparer, Value = op.GetValueOrDefault() };
             throw new InvalidOperationException();
         }
 
@@ -185,7 +211,7 @@ namespace PolyculeDb.QueryEngine
             while (_reader.Peek() > 0 && IsWordChar((char)_reader.Peek()))
                 sb.Append((char)_reader.Read());
             var word = sb.ToString();
-            if (Enum.GetNames(typeof(Word)).Select(element => element.ToLower()).Contains(word))
+            if (Syntax.GetWords().Contains(word))
                 return new Token { Type = TokenType.Keyword, Value = word };
             throw new NotSupportedException();
         }
